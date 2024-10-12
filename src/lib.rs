@@ -27,3 +27,35 @@
 //! This crate contains zero unsafe blocks of code.
 
 #![no_std]
+
+pub mod ident;
+
+/// Generally, all structs parsed at this level only check for correct length.
+#[derive(Clone, Copy, Debug, Default, Hash, PartialEq, Eq, PartialOrd, Ord)]
+pub struct Raw;
+/// Generally, all structs parsed at this level only check the correctness of themselves.
+#[derive(Clone, Copy, Debug, Default, Hash, PartialEq, Eq, PartialOrd, Ord)]
+pub struct MinimalParse;
+
+/// Trait representing the various different levels of parsing.
+///
+/// This trait is sealed.
+pub trait ParseState: Clone + Copy + private::ParseStateSealed {}
+
+impl ParseState for Raw {}
+impl ParseState for MinimalParse {}
+
+/// Trait representing that the struct has been at least minimally parsed.
+pub trait MinimallyParsed: ParseState {}
+
+impl MinimallyParsed for MinimalParse {}
+
+mod private {
+    //! Module used to seal [`ParseState`][crate::ParseState].
+
+    /// Sealing trait for [`ParseState`][crate::ParseState].
+    pub trait ParseStateSealed {}
+
+    impl ParseStateSealed for crate::Raw {}
+    impl ParseStateSealed for crate::MinimalParse {}
+}
