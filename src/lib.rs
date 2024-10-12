@@ -27,3 +27,5 @@
 //! This crate contains zero unsafe blocks of code.
 
 #![no_std]
+
+pub mod ident;
