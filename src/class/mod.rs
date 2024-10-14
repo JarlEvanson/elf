@@ -2,7 +2,10 @@
 
 use core::{error, fmt};
 
-use crate::{encoding::EncodingParse, header::ClassParseElfHeader, ident::Class};
+use crate::{
+    encoding::EncodingParse, header::ClassParseElfHeader, ident::Class,
+    program_header::ClassParseProgramHeader,
+};
 
 mod class_32;
 pub use class_32::*;
@@ -17,7 +20,7 @@ pub use merge::*;
 pub type AnyClass = Merge<Class32, Class64>;
 
 /// A combination of all other class parsing traits.
-pub trait ClassParse: ClassParseElfHeader + ClassParseBase {}
+pub trait ClassParse: ClassParseElfHeader + ClassParseProgramHeader + ClassParseBase {}
 
 /// The base definitions of a class aware parser.
 pub trait ClassParseBase: Clone + Copy {

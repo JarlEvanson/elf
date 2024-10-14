@@ -22,6 +22,9 @@ pub struct ElfHeader<'slice, C, E> {
 }
 
 impl<'slice, C: ClassParse, E: EncodingParse> ElfHeader<'slice, C, E> {
+    /// The current version of the ELF file.
+    pub const CURRENT_FILE_VERSION: u32 = 1;
+
     /// Parses an [`ElfHeader`] from the provided `slice`.
     ///
     /// # Errors
