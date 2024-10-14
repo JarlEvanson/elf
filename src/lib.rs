@@ -28,5 +28,6 @@
 
 #![no_std]
 
+pub mod class;
 pub mod encoding;
 pub mod ident;
