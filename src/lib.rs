@@ -28,6 +28,7 @@
 
 #![no_std]
 
+pub mod encoding;
 pub mod ident;
 
 /// Generally, all structs parsed at this level only check for correct length.
