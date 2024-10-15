@@ -9,9 +9,9 @@ use crate::{MinimalParse, ParseState, Raw};
 #[derive(Clone, Copy, Hash, PartialEq, Eq)]
 pub struct ElfIdent<'slice, S> {
     /// The underlying bytes of the ELF file identifier.
-    bytes: &'slice [u8; 16],
+    pub(crate) bytes: &'slice [u8; 16],
     /// Phantom data used for the type state pattern.
-    state: PhantomData<S>,
+    pub(crate) state: PhantomData<S>,
 }
 
 impl<'slice> ElfIdent<'slice, Raw> {
