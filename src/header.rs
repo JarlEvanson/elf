@@ -72,6 +72,16 @@ impl<'slice, C: ClassParse, E: EncodingParse> ElfHeader<'slice, C, E> {
         Ok(())
     }
 
+    /// Returns the [`ClassParse`] implementation of this [`ElfHeader`].
+    pub fn class_parse(&self) -> C {
+        self.class
+    }
+
+    /// Returns the [`EncodingParse`] implementation of this [`ElfHeader`].
+    pub fn encoding_parse(&self) -> E {
+        self.encoding
+    }
+
     /// Returns the [`ElfIdent`] associated with this [`ElfHeader`].
     pub fn ident(&self) -> ElfIdent<'slice> {
         match self.bytes.first_chunk() {
