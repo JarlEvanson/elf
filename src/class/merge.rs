@@ -2,6 +2,7 @@
 
 use crate::{
     class::{ClassParse, ClassParseBase},
+    dynamic::ClassParseDynamic,
     header::ClassParseElfHeader,
     program_header::ClassParseProgramHeader,
 };
@@ -192,6 +193,40 @@ where
         match self {
             Self::A(a) => a.expected_program_header_size(),
             Self::B(b) => b.expected_program_header_size(),
+        }
+    }
+}
+
+impl<A: ClassParse, B: ClassParse> ClassParseDynamic for Merge<A, B>
+where
+    B::ClassUsize: From<A::ClassUsize>,
+    B::ClassIsize: From<A::ClassIsize>,
+{
+    fn dynamic_tag_eq(
+        tag: crate::dynamic::DynamicTag<Self>,
+        const_tag: crate::dynamic::ConstDynamicTag,
+    ) -> bool {
+        B::dynamic_tag_eq(crate::dynamic::DynamicTag::<B>(tag.0), const_tag)
+    }
+
+    fn dynamic_tag_offset(self) -> usize {
+        match self {
+            Self::A(a) => a.dynamic_tag_offset(),
+            Self::B(b) => b.dynamic_tag_offset(),
+        }
+    }
+
+    fn dynamic_value_offset(self) -> usize {
+        match self {
+            Self::A(a) => a.dynamic_value_offset(),
+            Self::B(b) => b.dynamic_value_offset(),
+        }
+    }
+
+    fn expected_dynamic_size(self) -> usize {
+        match self {
+            Self::A(a) => a.expected_dynamic_size(),
+            Self::B(b) => b.expected_dynamic_size(),
         }
     }
 }
