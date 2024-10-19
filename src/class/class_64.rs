@@ -8,6 +8,7 @@ use crate::{
     header::{ClassParseElfHeader, ElfType, Machine},
     ident::{Class, DefElfIdent},
     program_header::{ClassParseProgramHeader, SegmentFlags, SegmentType},
+    relocation::ClassParseRelocation,
 };
 
 /// A zero-sized object offering methods to safely parse 64-bit ELF files.
@@ -173,6 +174,59 @@ impl ClassParseDynamic for Class64 {
 pub(crate) struct Elf64Dynamic {
     pub tag: i64,
     pub value: u64,
+}
+
+impl ClassParseRelocation for Class64 {
+    fn relocation_type_raw(self, info: Self::ClassUsize) -> u32 {
+        info as u32
+    }
+
+    fn symbol_raw(self, info: Self::ClassUsize) -> u32 {
+        (info >> 32) as u32
+    }
+
+    fn rel_offset_offset(self) -> usize {
+        mem::offset_of!(Elf64Rel, offset)
+    }
+
+    fn rel_info_offset(self) -> usize {
+        mem::offset_of!(Elf64Rel, info)
+    }
+
+    fn rela_offset_offset(self) -> usize {
+        mem::offset_of!(Elf64Rela, offset)
+    }
+
+    fn rela_info_offset(self) -> usize {
+        mem::offset_of!(Elf64Rela, info)
+    }
+
+    fn rela_addend_offset(self) -> usize {
+        mem::offset_of!(Elf64Rela, addend)
+    }
+
+    fn expected_rel_size(self) -> usize {
+        mem::size_of::<Elf64Rel>()
+    }
+
+    fn expected_rela_size(self) -> usize {
+        mem::size_of::<Elf64Rela>()
+    }
+}
+
+#[repr(C)]
+#[expect(clippy::missing_docs_in_private_items)]
+pub(crate) struct Elf64Rel {
+    pub offset: u64,
+    pub info: u64,
+}
+
+#[repr(C)]
+#[expect(clippy::missing_docs_in_private_items)]
+pub(crate) struct Elf64Rela {
+    pub offset: u64,
+    pub info: u64,
+    pub addend: i64,
 }
 
 impl ClassParseBase for Class64 {

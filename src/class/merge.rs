@@ -5,6 +5,7 @@ use crate::{
     dynamic::ClassParseDynamic,
     header::ClassParseElfHeader,
     program_header::ClassParseProgramHeader,
+    relocation::ClassParseRelocation,
 };
 
 /// An object used to dispatch the [`ClassParse`] to the two underlying [`ClassParse`]
@@ -21,6 +22,7 @@ impl<A: ClassParse, B: ClassParse> ClassParse for Merge<A, B>
 where
     B::ClassUsize: From<A::ClassUsize>,
     B::ClassIsize: From<A::ClassIsize>,
+    A::ClassUsize: TryFrom<B::ClassUsize>,
 {
 }
 
@@ -28,6 +30,7 @@ impl<A: ClassParse, B: ClassParse> ClassParseElfHeader for Merge<A, B>
 where
     B::ClassUsize: From<A::ClassUsize>,
     B::ClassIsize: From<A::ClassIsize>,
+    A::ClassUsize: TryFrom<B::ClassUsize>,
 {
     fn elf_type_offset(self) -> usize {
         match self {
@@ -132,6 +135,7 @@ impl<A: ClassParse, B: ClassParse> ClassParseProgramHeader for Merge<A, B>
 where
     B::ClassUsize: From<A::ClassUsize>,
     B::ClassIsize: From<A::ClassIsize>,
+    A::ClassUsize: TryFrom<B::ClassUsize>,
 {
     fn segment_type_offset(self) -> usize {
         match self {
@@ -201,6 +205,7 @@ impl<A: ClassParse, B: ClassParse> ClassParseDynamic for Merge<A, B>
 where
     B::ClassUsize: From<A::ClassUsize>,
     B::ClassIsize: From<A::ClassIsize>,
+    A::ClassUsize: TryFrom<B::ClassUsize>,
 {
     fn dynamic_tag_eq(
         tag: crate::dynamic::DynamicTag<Self>,
@@ -231,10 +236,83 @@ where
     }
 }
 
+impl<A: ClassParse, B: ClassParse> ClassParseRelocation for Merge<A, B>
+where
+    B::ClassUsize: From<A::ClassUsize>,
+    B::ClassIsize: From<A::ClassIsize>,
+    A::ClassUsize: TryFrom<B::ClassUsize>,
+{
+    fn relocation_type_raw(self, info: Self::ClassUsize) -> u32 {
+        match self {
+            Self::A(a) => {
+                a.relocation_type_raw(A::ClassUsize::try_from(info).map_err(|_| ()).unwrap())
+            }
+            Self::B(b) => b.relocation_type_raw(info),
+        }
+    }
+
+    fn symbol_raw(self, info: Self::ClassUsize) -> u32 {
+        match self {
+            Self::A(a) => a.symbol_raw(A::ClassUsize::try_from(info).map_err(|_| ()).unwrap()),
+            Self::B(b) => b.symbol_raw(info),
+        }
+    }
+
+    fn rel_offset_offset(self) -> usize {
+        match self {
+            Self::A(a) => a.rel_offset_offset(),
+            Self::B(b) => b.rel_offset_offset(),
+        }
+    }
+
+    fn rel_info_offset(self) -> usize {
+        match self {
+            Self::A(a) => a.rel_info_offset(),
+            Self::B(b) => b.rel_info_offset(),
+        }
+    }
+
+    fn rela_offset_offset(self) -> usize {
+        match self {
+            Self::A(a) => a.rela_offset_offset(),
+            Self::B(b) => b.rela_offset_offset(),
+        }
+    }
+
+    fn rela_info_offset(self) -> usize {
+        match self {
+            Self::A(a) => a.rela_info_offset(),
+            Self::B(b) => b.rela_info_offset(),
+        }
+    }
+
+    fn rela_addend_offset(self) -> usize {
+        match self {
+            Self::A(a) => a.rela_addend_offset(),
+            Self::B(b) => b.rela_addend_offset(),
+        }
+    }
+
+    fn expected_rel_size(self) -> usize {
+        match self {
+            Self::A(a) => a.expected_rel_size(),
+            Self::B(b) => b.expected_rel_size(),
+        }
+    }
+
+    fn expected_rela_size(self) -> usize {
+        match self {
+            Self::A(a) => a.expected_rela_size(),
+            Self::B(b) => b.expected_rela_size(),
+        }
+    }
+}
+
 impl<A: ClassParse, B: ClassParse> ClassParseBase for Merge<A, B>
 where
     B::ClassUsize: From<A::ClassUsize>,
     B::ClassIsize: From<A::ClassIsize>,
+    A::ClassUsize: TryFrom<B::ClassUsize>,
 {
     type ClassUsize = B::ClassUsize;
     type ClassIsize = B::ClassIsize;

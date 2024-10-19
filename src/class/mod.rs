@@ -4,7 +4,7 @@ use core::{error, fmt};
 
 use crate::{
     dynamic::ClassParseDynamic, encoding::EncodingParse, header::ClassParseElfHeader, ident::Class,
-    program_header::ClassParseProgramHeader,
+    program_header::ClassParseProgramHeader, relocation::ClassParseRelocation,
 };
 
 mod class_32;
@@ -21,7 +21,11 @@ pub type AnyClass = Merge<Class32, Class64>;
 
 /// A combination of all other class parsing traits.
 pub trait ClassParse:
-    ClassParseElfHeader + ClassParseProgramHeader + ClassParseDynamic + ClassParseBase
+    ClassParseElfHeader
+    + ClassParseProgramHeader
+    + ClassParseDynamic
+    + ClassParseRelocation
+    + ClassParseBase
 {
 }
 

@@ -8,6 +8,7 @@ use crate::{
     header::{ClassParseElfHeader, ElfType, Machine},
     ident::{Class, DefElfIdent},
     program_header::{ClassParseProgramHeader, SegmentFlags, SegmentType},
+    relocation::ClassParseRelocation,
 };
 
 /// A zero-sized object offering methods to safely parse 32-bit ELF files.
@@ -173,6 +174,59 @@ impl ClassParseDynamic for Class32 {
 pub(crate) struct Elf32Dynamic {
     pub tag: i32,
     pub value: u32,
+}
+
+impl ClassParseRelocation for Class32 {
+    fn relocation_type_raw(self, info: Self::ClassUsize) -> u32 {
+        info & 0xFF
+    }
+
+    fn symbol_raw(self, info: Self::ClassUsize) -> u32 {
+        info >> 8
+    }
+
+    fn rel_offset_offset(self) -> usize {
+        mem::offset_of!(Elf32Rel, offset)
+    }
+
+    fn rel_info_offset(self) -> usize {
+        mem::offset_of!(Elf32Rel, info)
+    }
+
+    fn rela_offset_offset(self) -> usize {
+        mem::offset_of!(Elf32Rela, offset)
+    }
+
+    fn rela_info_offset(self) -> usize {
+        mem::offset_of!(Elf32Rela, info)
+    }
+
+    fn rela_addend_offset(self) -> usize {
+        mem::offset_of!(Elf32Rela, addend)
+    }
+
+    fn expected_rel_size(self) -> usize {
+        mem::size_of::<Elf32Rel>()
+    }
+
+    fn expected_rela_size(self) -> usize {
+        mem::size_of::<Elf32Rela>()
+    }
+}
+
+#[repr(C)]
+#[expect(clippy::missing_docs_in_private_items)]
+pub(crate) struct Elf32Rel {
+    pub offset: u32,
+    pub info: u32,
+}
+
+#[repr(C)]
+#[expect(clippy::missing_docs_in_private_items)]
+pub(crate) struct Elf32Rela {
+    pub offset: u32,
+    pub info: u32,
+    pub addend: i32,
 }
 
 impl ClassParseBase for Class32 {

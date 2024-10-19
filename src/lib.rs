@@ -41,6 +41,7 @@ pub mod encoding;
 pub mod header;
 pub mod ident;
 pub mod program_header;
+pub mod relocation;
 
 /// An ELF file.
 #[derive(Clone, Copy, Hash, PartialEq, Eq)]
